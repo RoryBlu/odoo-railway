@@ -21,19 +21,38 @@ fi
 
 echo "Database user: ${ODOO_DATABASE_USER}"
 
-# Fix permissions on the data directory if running as root
-if [ "$(id -u)" = "0" ]; then
-    echo "Running as root, fixing volume permissions..."
-    chown -R odoo:odoo /var/lib/odoo || true
-    chmod 755 /var/lib/odoo || true
+# Check current user ID
+CURRENT_UID=$(id -u)
+echo "Running as UID: $CURRENT_UID"
+
+# If not running as odoo user (UID 101), we need to handle permissions
+if [ "$CURRENT_UID" != "101" ]; then
+    echo "Not running as odoo user (UID 101)"
     
-    # Test if odoo user can write to the directory
-    if ! su odoo -c "test -w /var/lib/odoo"; then
-        echo "ERROR: Failed to fix volume permissions"
-        echo "Ensure RAILWAY_RUN_UID=101 is set in environment variables"
-        exit 1
+    # If we're root, we can fix permissions
+    if [ "$CURRENT_UID" = "0" ]; then
+        echo "Running as root, fixing volume permissions..."
+        chown -R odoo:odoo /var/lib/odoo || true
+        chmod 755 /var/lib/odoo || true
+        # Create sessions directory
+        mkdir -p /var/lib/odoo/sessions
+        chown -R odoo:odoo /var/lib/odoo/sessions
+        echo "Volume permissions fixed"
+    else
+        echo "WARNING: Running as UID $CURRENT_UID (not root, not odoo)"
+        echo "Attempting to create writable directories..."
+        # Try to create directories anyway
+        mkdir -p /var/lib/odoo/sessions 2>/dev/null || true
+        mkdir -p /var/lib/odoo/filestore 2>/dev/null || true
+        # Check if we can write
+        if ! touch /var/lib/odoo/.write_test 2>/dev/null; then
+            echo "ERROR: Cannot write to /var/lib/odoo"
+            echo "Railway is running container as UID $CURRENT_UID"
+            echo "Add RAILWAY_RUN_UID=0 to environment variables to fix"
+            exit 1
+        fi
+        rm -f /var/lib/odoo/.write_test
     fi
-    echo "Volume permissions fixed successfully"
 fi
 
 # Wait for database with timeout (60 seconds)
@@ -92,11 +111,19 @@ trap 'echo "Received SIGTERM, shutting down..."; kill -TERM $PID; wait $PID' TER
 
 echo "Starting Odoo..."
 
-# If running as root, drop privileges to odoo user
-if [ "$(id -u)" = "0" ]; then
+# Handle user switching based on current UID
+CURRENT_UID=$(id -u)
+if [ "$CURRENT_UID" = "0" ]; then
+    # Running as root, can drop privileges
     echo "Dropping privileges to odoo user..."
     exec gosu odoo sh -c "${ODOO_CMD} 2>&1"
-else
+elif [ "$CURRENT_UID" = "101" ]; then
     # Already running as odoo user
+    echo "Already running as odoo user"
+    eval "exec ${ODOO_CMD} 2>&1"
+else
+    # Running as some other user (like UID 1)
+    echo "Running as UID $CURRENT_UID - cannot switch users"
+    echo "Container will run with current permissions"
     eval "exec ${ODOO_CMD} 2>&1"
 fi
