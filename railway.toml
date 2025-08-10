@@ -4,6 +4,8 @@ dockerfilePath = "Dockerfile"
 
 [deploy]
 startCommand = "/app/entrypoint.sh"
+# Run as odoo user (UID 101) to match volume permissions
+runAsUser = 101
 # Odoo's actual health endpoint
 healthcheckPath = "/web/database/selector"
 healthcheckTimeout = 300

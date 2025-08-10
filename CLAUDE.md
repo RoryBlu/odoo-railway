@@ -62,10 +62,11 @@ Before deploying Odoo, you need to create a non-postgres database user:
 1. Deploy PostgreSQL service on Railway first
 2. Create the 'odoo' database user (see Database Setup above)
 3. Deploy this repository
-4. Set environment variables (see .env.railway for template)
-5. Add volume mount at `/var/lib/odoo` for persistent storage
-6. Configure SMTP settings in Railway dashboard (optional)
-7. Access Odoo at your Railway-provided URL
+4. **CRITICAL**: Set `RAILWAY_RUN_UID=101` in environment variables for volume permissions
+5. Set other environment variables (see .env.railway for complete template)
+6. Volume mount at `/var/lib/odoo` is automatically configured via railway.toml
+7. Configure SMTP settings in Railway dashboard (optional)
+8. Access Odoo at your Railway-provided URL
 
 The `railway.toml` file automatically configures:
 - PostgreSQL connection using Railway's service variables
@@ -105,8 +106,10 @@ docker run -p 8069:8069 \
 
 - Default admin credentials are `admin`/`admin` - change immediately after first login
 - The application runs with `--proxy-mode` enabled for reverse proxy compatibility
-- All modules are initialized on first run (`--init=all`)
+- Only base modules are initialized on first run (`--init=base`)
 - Demo data is disabled (`--without-demo=True`)
 - Database connection uses private networking by default with no external exposure
-- Container runs as 'odoo' user (UID 101) for security - never as root
+- Container runs as 'odoo' user (UID 101) for security
 - PostgreSQL 'postgres' user is blocked by Odoo - always create a dedicated database user
+- **Volume permissions**: Set `RAILWAY_RUN_UID=101` to ensure proper volume mount permissions
+- The container automatically fixes volume permissions on startup if running as root

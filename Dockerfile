@@ -9,7 +9,7 @@ ENV LANG=${LOCALE}
 USER 0
 
 RUN apt-get -y update && apt-get install -y --no-install-recommends \
-    locales netcat-openbsd postgresql-client \
+    locales netcat-openbsd postgresql-client gosu \
     && locale-gen ${LOCALE} \
     && mkdir -p /var/lib/odoo \
     && chown -R odoo:odoo /var/lib/odoo \
@@ -26,8 +26,9 @@ COPY --chown=odoo:odoo --chmod=755 entrypoint.sh /app/
 # Note: Not declaring VOLUME to avoid conflicts with Railway's volume mounting
 # Railway will handle volume mounting via railway.toml
 
-# Switch back to odoo user for security
-USER odoo
+# Run as root initially to handle permission fixes, then drop to odoo user
+# The entrypoint script will use gosu to switch to odoo user after fixing permissions
+USER 0
 
 ENTRYPOINT ["/bin/sh"]
 

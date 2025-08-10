@@ -21,15 +21,19 @@ fi
 
 echo "Database user: ${ODOO_DATABASE_USER}"
 
-# Test if we can write to the data directory
-if [ ! -w "/var/lib/odoo" ]; then
-    echo "WARNING: /var/lib/odoo is not writable by odoo user"
-    echo "Attempting to use subdirectory..."
-    if ! mkdir -p /var/lib/odoo/data 2>/dev/null; then
-        echo "ERROR: Cannot create data directory. Volume permissions issue!"
-        echo "Add RAILWAY_RUN_UID=101 to your environment variables"
+# Fix permissions on the data directory if running as root
+if [ "$(id -u)" = "0" ]; then
+    echo "Running as root, fixing volume permissions..."
+    chown -R odoo:odoo /var/lib/odoo || true
+    chmod 755 /var/lib/odoo || true
+    
+    # Test if odoo user can write to the directory
+    if ! su odoo -c "test -w /var/lib/odoo"; then
+        echo "ERROR: Failed to fix volume permissions"
+        echo "Ensure RAILWAY_RUN_UID=101 is set in environment variables"
         exit 1
     fi
+    echo "Volume permissions fixed successfully"
 fi
 
 # Wait for database with timeout (60 seconds)
@@ -87,5 +91,12 @@ fi
 trap 'echo "Received SIGTERM, shutting down..."; kill -TERM $PID; wait $PID' TERM
 
 echo "Starting Odoo..."
-# Use eval to properly handle the command string with potential spaces
-eval "exec ${ODOO_CMD} 2>&1"
+
+# If running as root, drop privileges to odoo user
+if [ "$(id -u)" = "0" ]; then
+    echo "Dropping privileges to odoo user..."
+    exec gosu odoo sh -c "${ODOO_CMD} 2>&1"
+else
+    # Already running as odoo user
+    eval "exec ${ODOO_CMD} 2>&1"
+fi
