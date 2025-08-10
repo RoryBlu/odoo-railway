@@ -2,7 +2,11 @@
 
 set -e
 
-echo Waiting for database...
+# Set default PORT if not provided by Railway
+PORT=${PORT:-8069}
+
+echo "Starting Odoo on port ${PORT}"
+echo "Waiting for database..."
 
 while ! nc -z ${ODOO_DATABASE_HOST} ${ODOO_DATABASE_PORT} 2>&1; do sleep 1; done; 
 
