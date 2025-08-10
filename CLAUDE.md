@@ -44,11 +44,28 @@ The application expects these environment variables at runtime:
 
 ## Railway Deployment
 
+### Prerequisites
+**CRITICAL**: Odoo has security requirements that must be met:
+1. **Cannot run as root user** - The container runs as 'odoo' user (UID 101)
+2. **Cannot use 'postgres' database user** - You must create a dedicated database user
+
+### Database Setup
+Before deploying Odoo, you need to create a non-postgres database user:
+1. Connect to your PostgreSQL instance
+2. Create a dedicated user:
+   ```sql
+   CREATE USER odoo WITH CREATEDB PASSWORD 'your-secure-password';
+   ```
+3. Use these credentials in your environment variables
+
 ### Quick Deploy
 1. Deploy PostgreSQL service on Railway first
-2. Deploy this repository - PostgreSQL variables are automatically mapped via `railway.toml`
-3. Configure SMTP settings in Railway dashboard (optional)
-4. Access Odoo at your Railway-provided URL
+2. Create the 'odoo' database user (see Database Setup above)
+3. Deploy this repository
+4. Set environment variables (see .env.railway for template)
+5. Add volume mount at `/var/lib/odoo` for persistent storage
+6. Configure SMTP settings in Railway dashboard (optional)
+7. Access Odoo at your Railway-provided URL
 
 The `railway.toml` file automatically configures:
 - PostgreSQL connection using Railway's service variables
@@ -91,3 +108,5 @@ docker run -p 8069:8069 \
 - All modules are initialized on first run (`--init=all`)
 - Demo data is disabled (`--without-demo=True`)
 - Database connection uses private networking by default with no external exposure
+- Container runs as 'odoo' user (UID 101) for security - never as root
+- PostgreSQL 'postgres' user is blocked by Odoo - always create a dedicated database user
