@@ -18,6 +18,9 @@ WORKDIR /app
 
 COPY --chmod=755 entrypoint.sh ./
 
+# Declare volume for persistent data
+VOLUME ["/var/lib/odoo"]
+
 # Switch back to odoo user for security
 USER odoo
 

@@ -20,6 +20,14 @@ if [ "${ODOO_DATABASE_USER}" = "postgres" ]; then
 fi
 
 echo "Database user: ${ODOO_DATABASE_USER}"
+
+# Test if we can write to the data directory
+if [ ! -w "/var/lib/odoo" ]; then
+    echo "WARNING: /var/lib/odoo is not writable by odoo user"
+    echo "Attempting to use subdirectory..."
+    mkdir -p /var/lib/odoo/data 2>/dev/null || true
+fi
+
 echo "Waiting for database..."
 
 while ! nc -z ${ODOO_DATABASE_HOST} ${ODOO_DATABASE_PORT} 2>&1; do sleep 1; done; 
