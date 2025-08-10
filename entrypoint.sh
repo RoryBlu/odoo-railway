@@ -25,7 +25,11 @@ echo "Database user: ${ODOO_DATABASE_USER}"
 if [ ! -w "/var/lib/odoo" ]; then
     echo "WARNING: /var/lib/odoo is not writable by odoo user"
     echo "Attempting to use subdirectory..."
-    mkdir -p /var/lib/odoo/data 2>/dev/null || true
+    if ! mkdir -p /var/lib/odoo/data 2>/dev/null; then
+        echo "ERROR: Cannot create data directory. Volume permissions issue!"
+        echo "Add RAILWAY_RUN_UID=101 to your environment variables"
+        exit 1
+    fi
 fi
 
 # Wait for database with timeout (60 seconds)
@@ -47,7 +51,10 @@ done
 echo "Database is now available"
 
 # Check if database is already initialized (look for ir_module_module table)
-DB_INITIALIZED=$(PGPASSWORD="${ODOO_DATABASE_PASSWORD}" psql -h "${ODOO_DATABASE_HOST}" -p "${ODOO_DATABASE_PORT}" -U "${ODOO_DATABASE_USER}" -d "${ODOO_DATABASE_NAME}" -tAc "SELECT 1 FROM information_schema.tables WHERE table_name='ir_module_module'" 2>/dev/null || echo "0")
+# Using connection string to avoid password in process list
+export PGPASSWORD="${ODOO_DATABASE_PASSWORD}"
+DB_INITIALIZED=$(psql -h "${ODOO_DATABASE_HOST}" -p "${ODOO_DATABASE_PORT}" -U "${ODOO_DATABASE_USER}" -d "${ODOO_DATABASE_NAME}" -tAc "SELECT 1 FROM information_schema.tables WHERE table_name='ir_module_module'" 2>/dev/null || echo "0")
+unset PGPASSWORD
 
 # Build Odoo command
 ODOO_CMD="odoo --http-port=${PORT}"
@@ -76,5 +83,9 @@ fi
 
 [ -n "${ODOO_EMAIL_FROM}" ] && ODOO_CMD="${ODOO_CMD} --email-from=${ODOO_EMAIL_FROM}"
 
+# Handle SIGTERM for graceful shutdown
+trap 'echo "Received SIGTERM, shutting down..."; kill -TERM $PID; wait $PID' TERM
+
 echo "Starting Odoo..."
-exec $ODOO_CMD 2>&1
+# Use eval to properly handle the command string with potential spaces
+eval "exec ${ODOO_CMD} 2>&1"

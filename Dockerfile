@@ -23,8 +23,8 @@ WORKDIR /app
 # Copy entrypoint and fix permissions
 COPY --chown=odoo:odoo --chmod=755 entrypoint.sh /app/
 
-# Declare volume for persistent data
-VOLUME ["/var/lib/odoo"]
+# Note: Not declaring VOLUME to avoid conflicts with Railway's volume mounting
+# Railway will handle volume mounting via railway.toml
 
 # Switch back to odoo user for security
 USER odoo
