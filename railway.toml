@@ -1,46 +1,13 @@
-# Railway Configuration for Odoo Deployment
-# This file automatically configures environment variables for Railway deployment
-
 [build]
 builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile"
 
 [deploy]
-# Let Railway assign the port dynamically
 startCommand = "./entrypoint.sh"
 healthcheckPath = "/web/health"
 healthcheckTimeout = 300
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 10
 
-# Environment variable configuration
-[[services]]
-name = "odoo"
-
-# PostgreSQL Database Configuration
-# These variables automatically reference a PostgreSQL service deployed on Railway
-# Make sure to deploy PostgreSQL first, then these will auto-connect
-[services.envs]
-# Database connection - automatically pulled from Railway PostgreSQL service
-ODOO_DATABASE_HOST = "${{Postgres.PGHOST}}"
-ODOO_DATABASE_PORT = "${{Postgres.PGPORT}}"
-ODOO_DATABASE_USER = "${{Postgres.PGUSER}}"
-ODOO_DATABASE_PASSWORD = "${{Postgres.PGPASSWORD}}"
-ODOO_DATABASE_NAME = "${{Postgres.PGDATABASE}}"
-
-# Runtime Configuration
-PORT = "${{PORT}}"  # Railway provides this automatically
-LOCALE = "en_US.UTF-8"
-
-# SMTP Configuration - Set these in Railway dashboard after deployment
-# Default values provided, override in Railway UI as needed
-ODOO_SMTP_HOST = "smtp.gmail.com"  # Change to your SMTP server
-ODOO_SMTP_PORT_NUMBER = "587"      # Common ports: 587 (TLS), 465 (SSL), 25 (unencrypted)
-ODOO_SMTP_USER = ""                # Set in Railway dashboard
-ODOO_SMTP_PASSWORD = ""            # Set in Railway dashboard  
-ODOO_EMAIL_FROM = "noreply@example.com"  # Change to your domain
-
-# Optional: Additional Odoo configuration
-# Uncomment and configure as needed
-# ODOO_ADMIN_EMAIL = "admin@example.com"
-# ODOO_ADMIN_PASSWORD = "changeme"  # Override default admin password
+[mounts]
+"/var/lib/odoo" = { volume = "odoo_data" }
