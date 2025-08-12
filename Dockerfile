@@ -15,9 +15,5 @@ RUN mkdir -p /var/lib/odoo && \
 # Switch back to odoo user
 USER odoo
 
-# The official image's entrypoint handles everything we need
-# It accepts these environment variables:
-# - HOST (database host)
-# - PORT (database port)  
-# - USER (database user)
-# - PASSWORD (database password)
+# The official image's entrypoint handles everything
+# Railway will override the CMD with the start command

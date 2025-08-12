@@ -3,10 +3,10 @@ builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile"
 
 [deploy]
-# Use official Odoo entrypoint (no custom command needed)
+# IMPORTANT: Set the start command to use Railway's PORT
+startCommand = "odoo --http-port=$PORT"
 # Run as odoo user (UID 101) for security
 # Note: If Railway has issues with UID 101, you may need to remove this line
-# and let Railway run as default, as the official image handles user switching
 runAsUser = 101
 healthcheckPath = "/web/database/selector"
 healthcheckTimeout = 300
