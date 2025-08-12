@@ -4,43 +4,38 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is an Odoo deployment template for Railway platform. It provides a containerized setup for running Odoo 18.0 with PostgreSQL database backend.
+This is an Odoo deployment template for Railway platform. It provides a containerized setup for running Odoo 18.0 with PostgreSQL database backend using the official Odoo Docker image.
 
 ## Architecture
 
 - **Base Image**: Odoo 18.0 official Docker image
 - **Database**: PostgreSQL (connected via private network)
-- **Entry Point**: Custom shell script that waits for database availability before starting Odoo
-- **Configuration**: Environment-variable driven setup for database, SMTP, and runtime parameters
+- **Entry Point**: Official Odoo entrypoint that handles database connectivity and initialization
+- **Configuration**: Environment-variable driven setup using standard Odoo Docker variables
 
 ## Key Files
 
-- `Dockerfile`: Extends odoo:18.0 image with locales and netcat for health checking
-- `entrypoint.sh`: Startup script that ensures database connectivity before launching Odoo
-- `railway.toml`: Railway deployment configuration with automatic PostgreSQL variable mapping
+- `Dockerfile`: Minimal extension of odoo:18.0 image to ensure proper volume permissions
+- `railway.toml`: Railway deployment configuration with volume mounting and health checks
 - `readme.md`: Contains deployment notes and configuration details
+- `.env.railway`: Template for Railway environment variables
 
 ## Environment Variables
 
-The application expects these environment variables at runtime:
+The application uses the official Odoo Docker environment variables:
 
-### Database Configuration
-- `ODOO_DATABASE_HOST`: PostgreSQL host address
-- `ODOO_DATABASE_PORT`: PostgreSQL port (typically 5432)
-- `ODOO_DATABASE_USER`: Database user
-- `ODOO_DATABASE_PASSWORD`: Database password
-- `ODOO_DATABASE_NAME`: Database name for Odoo
+### Database Configuration (Required)
+- `HOST`: PostgreSQL host address (e.g., `${{Postgres.PGHOST}}`)
+- `PORT`: PostgreSQL port (default: 5432, e.g., `${{Postgres.PGPORT}}`)
+- `USER`: Database user (must NOT be 'postgres' - create a dedicated user like 'odoo')
+- `PASSWORD`: Database password
 
-### SMTP Configuration
-- `ODOO_SMTP_HOST`: Mail server host
-- `ODOO_SMTP_PORT_NUMBER`: Mail server port
-- `ODOO_SMTP_USER`: SMTP authentication user
-- `ODOO_SMTP_PASSWORD`: SMTP authentication password
-- `ODOO_EMAIL_FROM`: Default sender email address
+### Optional Configuration
+- `POSTGRES_DB`: Database name (defaults to 'postgres')
+- `ADMIN_PASSWORD`: Odoo admin password (set on first run)
 
-### Runtime
-- `PORT`: HTTP port for Odoo service
-- `LOCALE`: System locale (default: en_US.UTF-8)
+### SMTP Configuration (Optional)
+Standard Odoo SMTP configuration can be passed as command-line arguments or configured through the Odoo interface after deployment.
 
 ## Railway Deployment
 
@@ -62,25 +57,13 @@ Before deploying Odoo, you need to create a non-postgres database user:
 1. Deploy PostgreSQL service on Railway first
 2. Create the 'odoo' database user (see Database Setup above)
 3. Deploy this repository
-4. **CRITICAL**: Set `RAILWAY_RUN_UID=101` in environment variables for volume permissions
-5. Set other environment variables (see .env.railway for complete template)
-6. Volume mount at `/var/lib/odoo` is automatically configured via railway.toml
-7. Configure SMTP settings in Railway dashboard (optional)
-8. Access Odoo at your Railway-provided URL
-
-The `railway.toml` file automatically configures:
-- PostgreSQL connection using Railway's service variables
-- Dynamic port assignment
-- Health checks and restart policies
-- SMTP placeholders for easy configuration
-
-### Manual Environment Variables (if not using railway.toml)
-If deploying without railway.toml, manually set these in Railway:
-- `ODOO_DATABASE_HOST=${{Postgres.PGHOST}}`
-- `ODOO_DATABASE_PORT=${{Postgres.PGPORT}}`
-- `ODOO_DATABASE_USER=${{Postgres.PGUSER}}`
-- `ODOO_DATABASE_PASSWORD=${{Postgres.PGPASSWORD}}`
-- `ODOO_DATABASE_NAME=${{Postgres.PGDATABASE}}`
+4. Set environment variables in Railway:
+   - `HOST=${{Postgres.PGHOST}}`
+   - `PORT=${{Postgres.PGPORT}}`
+   - `USER=odoo`
+   - `PASSWORD=your-secure-password`
+5. Volume mount at `/var/lib/odoo` is automatically configured via railway.toml
+6. Access Odoo at your Railway-provided URL
 
 ## Common Development Tasks
 
@@ -93,23 +76,25 @@ docker build -t odoo-railway .
 Ensure PostgreSQL is running and accessible, then:
 ```bash
 docker run -p 8069:8069 \
-  -e ODOO_DATABASE_HOST=host.docker.internal \
-  -e ODOO_DATABASE_PORT=5432 \
-  -e ODOO_DATABASE_USER=odoo \
-  -e ODOO_DATABASE_PASSWORD=odoo_password \
-  -e ODOO_DATABASE_NAME=odoo \
-  -e PORT=8069 \
+  -e HOST=host.docker.internal \
+  -e PORT=5432 \
+  -e USER=odoo \
+  -e PASSWORD=odoo_password \
   odoo-railway
 ```
 
 ## Important Notes
 
-- Default admin credentials are `admin`/`admin` - change immediately after first login
-- The application runs with `--proxy-mode` enabled for reverse proxy compatibility
-- Only base modules are initialized on first run (`--init=base`)
-- Demo data is disabled (`--without-demo=True`)
-- Database connection uses private networking by default with no external exposure
+- Default admin credentials are set on first login - save them securely
+- The official Odoo image handles all initialization, database setup, and privilege dropping
 - Container runs as 'odoo' user (UID 101) for security
 - PostgreSQL 'postgres' user is blocked by Odoo - always create a dedicated database user
-- **Volume permissions**: Set `RAILWAY_RUN_UID=101` to ensure proper volume mount permissions
-- The container automatically fixes volume permissions on startup if running as root
+- The official entrypoint handles database connection waiting and initialization automatically
+
+## Simplification from Previous Version
+
+This template now uses the official Odoo Docker image's entrypoint instead of a custom one, which:
+- Reduces maintenance burden
+- Ensures compatibility with Odoo updates
+- Uses battle-tested code
+- Follows Docker and Odoo best practices

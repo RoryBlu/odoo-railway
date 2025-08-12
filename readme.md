@@ -1,49 +1,70 @@
-Dependencies for Odoo Hosting
-PostgreSQL Database: Required database backend for storing all business data and configurations
-Python Environment: Python runtime with Odoo framework and business application modules
-File Storage: Persistent storage for attachments, documents, and uploaded files
-Deployment Dependencies
-Odoo Official Website
-Odoo Documentation
-Odoo GitHub Repository
-Odoo Apps Store
-Implementation Details
-Important Setup Notes:
+# Odoo on Railway
 
-Your Odoo deployment creates a default administrator account with username admin and password admin
-First login action should be changing the default credentials through the preferences menu
-PostgreSQL communication occurs exclusively over the private network with no external database exposure by default
-External database access can be enabled through TCP proxying on port 5432 if needed
-Business Applications Overview:
+Deploy Odoo 18.0 ERP/CRM on Railway with PostgreSQL backend.
 
-Odoo provides a collection of integrated business applications that can be installed and configured based on your needs. Each application handles specific business processes while maintaining data integration across the platform.
+## Quick Deploy
 
-System Architecture:
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/odoo)
 
-# Basic Odoo configuration
-[options]
-addons_path = /opt/odoo/addons
-data_dir = /opt/odoo/data
-logfile = /var/log/odoo/odoo.log
-db_host = localhost
-db_port = 5432
-db_user = odoo
-db_password = odoo_password
-Module Management:
+## Prerequisites
 
-Install business applications through the Apps interface
-Configure modules based on business requirements
-Manage user permissions and access controls per module
-Update and maintain installed applications
-Database Management:
+1. **PostgreSQL Database**: Deploy a PostgreSQL service on Railway first
+2. **Database User**: Create a dedicated user (NOT 'postgres'):
+   ```sql
+   CREATE USER odoo WITH CREATEDB PASSWORD 'your-secure-password';
+   ```
 
-PostgreSQL handles all business data storage
-Regular backups essential for business continuity
-Database size grows significantly with business operations
-Performance optimization required for large datasets
-User Management:
+## Environment Variables
 
-Multi-user support with role-based access controls
-User licenses may apply depending on Odoo edition
-Session management for concurrent users
-Integration with external authentication systems
+Configure these in Railway's environment variables:
+
+### Required Database Variables
+- `HOST` - PostgreSQL host (use `${{Postgres.PGHOST}}`)
+- `PORT` - PostgreSQL port (use `${{Postgres.PGPORT}}`)
+- `USER` - Database user (e.g., 'odoo')
+- `PASSWORD` - Database password
+
+### Optional Variables
+- `POSTGRES_DB` - Database name (defaults to 'postgres')
+- `ADMIN_PASSWORD` - Odoo admin password (set on first login if not provided)
+
+## Features
+
+- **Odoo 18.0**: Latest stable version with all core modules
+- **PostgreSQL Backend**: Reliable database with private networking
+- **Persistent Storage**: Volume mount at `/var/lib/odoo` for data persistence
+- **Security**: Runs as non-root 'odoo' user (UID 101)
+- **Health Checks**: Automatic monitoring and restart on failure
+
+## Post-Deployment
+
+1. Access Odoo at your Railway-provided URL
+2. Set admin password on first login
+3. Install desired business modules through the Apps interface
+4. Configure SMTP settings for email functionality (optional)
+
+## Architecture
+
+This deployment uses the official Odoo Docker image with minimal customization:
+- Base image: `odoo:18.0`
+- Data persistence: Railway volume at `/var/lib/odoo`
+- Networking: Private PostgreSQL connection
+- Security: Non-root execution
+
+## Important Notes
+
+- **Never use 'postgres' as database user** - Odoo blocks this for security
+- **Save admin credentials** - Set strong password on first login
+- **Regular backups recommended** - Use Railway's backup features
+- **Module installation** - Some modules may require additional configuration
+
+## Resources
+
+- [Odoo Documentation](https://www.odoo.com/documentation/18.0/)
+- [Railway Documentation](https://docs.railway.app/)
+- [Odoo GitHub](https://github.com/odoo/odoo)
+
+## Support
+
+For issues specific to this Railway template, please open an issue in this repository.
+For Odoo-specific questions, visit the [Odoo Community Forum](https://www.odoo.com/forum/help-1).

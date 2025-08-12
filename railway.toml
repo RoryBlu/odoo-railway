@@ -3,10 +3,11 @@ builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile"
 
 [deploy]
-startCommand = "/app/entrypoint.sh"
-# Run as odoo user (UID 101) to match volume permissions
+# Use official Odoo entrypoint (no custom command needed)
+# Run as odoo user (UID 101) for security
+# Note: If Railway has issues with UID 101, you may need to remove this line
+# and let Railway run as default, as the official image handles user switching
 runAsUser = 101
-# Odoo's actual health endpoint
 healthcheckPath = "/web/database/selector"
 healthcheckTimeout = 300
 restartPolicyType = "ON_FAILURE"
