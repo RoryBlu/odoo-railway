@@ -3,8 +3,8 @@ builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile"
 
 [deploy]
-# IMPORTANT: Set the start command to use Railway's PORT
-startCommand = "odoo --http-port=$PORT"
+# Odoo runs on its default port 8069
+# Railway handles the port mapping automatically
 # Run as odoo user (UID 101) for security
 # Note: If Railway has issues with UID 101, you may need to remove this line
 runAsUser = 101
