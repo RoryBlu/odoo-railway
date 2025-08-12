@@ -15,5 +15,7 @@ RUN mkdir -p /var/lib/odoo && \
 # Switch back to odoo user
 USER odoo
 
+# Explicitly expose port 8069 for Railway
+EXPOSE 8069
+
 # The official image's entrypoint handles everything
-# Railway will override the CMD with the start command
