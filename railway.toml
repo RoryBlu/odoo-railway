@@ -3,8 +3,8 @@ builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile"
 
 [deploy]
-# Remove healthcheck - Railway will still monitor the container
-# Odoo is running fine, just not accessible for healthchecks
+# Pass SMTP configuration as command-line arguments
+startCommand = "/entrypoint.sh odoo --smtp=smtp.gmail.com --smtp-port=587 --smtp-user=rory@blucanarycapital.com --smtp-password='lgpu hprz cqfg hzah' --smtp-ssl --email-from='Odoo <rory@blucanarycapital.com>'"
 # Run as odoo user (UID 101) for security
 runAsUser = 101
 restartPolicyType = "ON_FAILURE"
