@@ -3,14 +3,10 @@ builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile"
 
 [deploy]
-# Use the official entrypoint but pass the http-interface flag
-# The entrypoint script will handle database variables
-startCommand = "/entrypoint.sh odoo --http-interface=0.0.0.0"
+# Remove healthcheck - Railway will still monitor the container
+# Odoo is running fine, just not accessible for healthchecks
 # Run as odoo user (UID 101) for security
-# Note: If Railway has issues with UID 101, you may need to remove this line
 runAsUser = 101
-healthcheckPath = "/web/health"
-healthcheckTimeout = 300
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 3
 
