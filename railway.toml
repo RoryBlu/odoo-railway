@@ -3,8 +3,9 @@ builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile"
 
 [deploy]
-# Tell Odoo to bind to all interfaces (0.0.0.0) so Railway can healthcheck it
-startCommand = "odoo --http-interface=0.0.0.0"
+# Use the official entrypoint but pass the http-interface flag
+# The entrypoint script will handle database variables
+startCommand = "/entrypoint.sh odoo --http-interface=0.0.0.0"
 # Run as odoo user (UID 101) for security
 # Note: If Railway has issues with UID 101, you may need to remove this line
 runAsUser = 101
