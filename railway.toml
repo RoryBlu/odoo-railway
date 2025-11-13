@@ -3,8 +3,8 @@ builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile"
 
 [deploy]
-# Pass Mailgun SMTP configuration as command-line arguments using environment variables
-startCommand = "/entrypoint.sh odoo --smtp=$MAILGUN_SMTP_HOST --smtp-port=$MAILGUN_SMTP_PORT --smtp-user=$MAILGUN_SMTP_USER --smtp-password=$MAILGUN_SMTP_PASSWORD --smtp-ssl --email-from=$MAILGUN_EMAIL_FROM"
+# SMTP can be configured through Odoo web interface after deployment
+# Settings > Technical > Outgoing Mail Servers
 # Run as odoo user (UID 101) for security
 runAsUser = 101
 restartPolicyType = "ON_FAILURE"
