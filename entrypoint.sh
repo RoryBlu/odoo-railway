@@ -17,6 +17,10 @@ while ! nc -z ${DB_HOST} ${DB_PORT} 2>&1; do sleep 1; done;
 
 echo "Database is now available"
 
+echo "DEBUG: DB_USER=${ODOO_DATABASE_USER}"
+echo "DEBUG: DB_NAME=${ODOO_DATABASE_NAME}"
+echo "DEBUG: DB_PASSWORD length: $(echo -n "${ODOO_DATABASE_PASSWORD}" | wc -c)"
+
 exec odoo \
     --http-port="${PORT}" \
     --init=all \
