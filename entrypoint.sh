@@ -2,17 +2,14 @@
 
 set -e
 
-# Debug: Print environment variables
-echo "DEBUG: ODOO_DATABASE_HOST=${ODOO_DATABASE_HOST}"
-echo "DEBUG: ODOO_DATABASE_PORT=${ODOO_DATABASE_PORT}"
-echo "DEBUG: ODOO_DATABASE_USER=${ODOO_DATABASE_USER}"
-
-# Default to 5432 if not set
+# Railway's internal PostgreSQL hostname
+# If ODOO_DATABASE_HOST is empty, use Railway's internal network
+DB_HOST="${ODOO_DATABASE_HOST:-postgres.railway.internal}"
 DB_PORT="${ODOO_DATABASE_PORT:-5432}"
 
-echo "Waiting for database at ${ODOO_DATABASE_HOST}:${DB_PORT}..."
+echo "Connecting to database at ${DB_HOST}:${DB_PORT}..."
 
-while ! nc -z ${ODOO_DATABASE_HOST} ${DB_PORT} 2>&1; do sleep 1; done;
+while ! nc -z ${DB_HOST} ${DB_PORT} 2>&1; do sleep 1; done;
 
 echo "Database is now available"
 
@@ -21,7 +18,7 @@ exec odoo \
     --init=all \
     --without-demo=True \
     --proxy-mode \
-    --db_host="${ODOO_DATABASE_HOST}" \
+    --db_host="${DB_HOST}" \
     --db_port="${DB_PORT}" \
     --db_user="${ODOO_DATABASE_USER}" \
     --db_password="${ODOO_DATABASE_PASSWORD}" \
