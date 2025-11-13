@@ -1,8 +1,14 @@
 # Environment variables
 .env
+.env.*
 .env.local
 .env.production
 .env.development
+.env.railway
+
+# Railway tokens
+.railway-token
+railway.token
 
 # Python
 __pycache__/
