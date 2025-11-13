@@ -6,9 +6,9 @@ set -e
 echo "Waiting for private network DNS..."
 sleep 3
 
-# Railway's internal PostgreSQL hostname
+# Railway's internal PostgreSQL hostname for postgres-ssl service
 # If ODOO_DATABASE_HOST is empty, use Railway's internal network
-DB_HOST="${ODOO_DATABASE_HOST:-postgres.railway.internal}"
+DB_HOST="${ODOO_DATABASE_HOST:-postgres-ssl.railway.internal}"
 DB_PORT="${ODOO_DATABASE_PORT:-5432}"
 
 echo "Connecting to database at ${DB_HOST}:${DB_PORT}..."
