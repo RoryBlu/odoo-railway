@@ -45,7 +45,8 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO odoo;
 EOF
 echo "Odoo user ready"
 
-exec odoo \
+# Drop privileges to odoo user (UID 101) before running Odoo
+exec gosu odoo odoo \
     --http-interface=0.0.0.0 \
     --http-port="${PORT}" \
     --init=all \
