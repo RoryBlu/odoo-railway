@@ -21,6 +21,10 @@ echo "DEBUG: DB_USER=${ODOO_DATABASE_USER}"
 echo "DEBUG: DB_NAME=${ODOO_DATABASE_NAME}"
 echo "DEBUG: DB_PASSWORD length: $(echo -n "${ODOO_DATABASE_PASSWORD}" | wc -c)"
 
+# Reset odoo user password to ensure it matches the environment variable
+echo "Ensuring odoo user password is set correctly..."
+PGPASSWORD='zAaUIpcupYvQtHcLGiAQhrWbhhMtrZtG' psql -h "${DB_HOST}" -U postgres -d railway -c "ALTER USER odoo WITH PASSWORD '${ODOO_DATABASE_PASSWORD}';" 2>&1 || echo "Warning: Could not update password"
+
 exec odoo \
     --http-port="${PORT}" \
     --init=all \

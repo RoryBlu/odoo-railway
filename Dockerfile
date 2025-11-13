@@ -8,7 +8,7 @@ ENV LANG=${LOCALE}
 
 USER 0
 
-RUN apt-get -y update && apt-get install -y --no-install-recommends locales netcat-openbsd \
+RUN apt-get -y update && apt-get install -y --no-install-recommends locales netcat-openbsd postgresql-client \
     && locale-gen ${LOCALE}
 
 WORKDIR /app
