@@ -2,11 +2,19 @@
 
 set -e
 
-echo Waiting for database...
+# Debug: Print environment variables
+echo "DEBUG: ODOO_DATABASE_HOST=${ODOO_DATABASE_HOST}"
+echo "DEBUG: ODOO_DATABASE_PORT=${ODOO_DATABASE_PORT}"
+echo "DEBUG: ODOO_DATABASE_USER=${ODOO_DATABASE_USER}"
 
-while ! nc -z ${ODOO_DATABASE_HOST} ${ODOO_DATABASE_PORT} 2>&1; do sleep 1; done;
+# Default to 5432 if not set
+DB_PORT="${ODOO_DATABASE_PORT:-5432}"
 
-echo Database is now available
+echo "Waiting for database at ${ODOO_DATABASE_HOST}:${DB_PORT}..."
+
+while ! nc -z ${ODOO_DATABASE_HOST} ${DB_PORT} 2>&1; do sleep 1; done;
+
+echo "Database is now available"
 
 exec odoo \
     --http-port="${PORT}" \
@@ -14,7 +22,7 @@ exec odoo \
     --without-demo=True \
     --proxy-mode \
     --db_host="${ODOO_DATABASE_HOST}" \
-    --db_port="${ODOO_DATABASE_PORT}" \
+    --db_port="${DB_PORT}" \
     --db_user="${ODOO_DATABASE_USER}" \
     --db_password="${ODOO_DATABASE_PASSWORD}" \
     --database="${ODOO_DATABASE_NAME}" \
