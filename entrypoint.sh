@@ -5,16 +5,20 @@ set -e
 echo "Fixing /var/lib/odoo permissions..."
 chown -R odoo:odoo /var/lib/odoo 2>/dev/null || true
 
-echo "Waiting for database..."
-while ! nc -z ${HOST} ${PORT} 2>&1; do sleep 1; done
+# Use postgres.railway.internal for private network (faster and more reliable)
+DB_HOST="postgres.railway.internal"
+DB_PORT="5432"
+
+echo "Waiting for database at ${DB_HOST}:${DB_PORT}..."
+while ! nc -z ${DB_HOST} ${DB_PORT} 2>&1; do sleep 1; done
 echo "Database is now available"
 
 # Start Odoo with command-line configuration
 exec odoo \
     --http-port="8069" \
     --proxy-mode \
-    --db_host="${HOST}" \
-    --db_port="${PORT}" \
+    --db_host="${DB_HOST}" \
+    --db_port="${DB_PORT}" \
     --db_user="${USER}" \
     --db_password="${PASSWORD}" \
     --database="${POSTGRES_DB}" \
