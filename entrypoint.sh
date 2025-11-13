@@ -20,6 +20,7 @@ echo "Database is now available"
 echo "DEBUG: DB_USER=${ODOO_DATABASE_USER}"
 echo "DEBUG: DB_NAME=${ODOO_DATABASE_NAME}"
 echo "DEBUG: DB_PASSWORD length: $(echo -n "${ODOO_DATABASE_PASSWORD}" | wc -c)"
+echo "DEBUG: PORT=${PORT}"
 
 # Create odoo user if it doesn't exist and set password
 echo "Ensuring odoo user exists and password is set correctly..."
@@ -45,6 +46,7 @@ EOF
 echo "Odoo user ready"
 
 exec odoo \
+    --http-interface=0.0.0.0 \
     --http-port="${PORT}" \
     --init=all \
     --without-demo=True \
