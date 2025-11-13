@@ -17,4 +17,9 @@ exec odoo \
     --db_port="${PORT}" \
     --db_user="${USER}" \
     --db_password="${PASSWORD}" \
-    --database="${POSTGRES_DB}"
+    --database="${POSTGRES_DB}" \
+    --smtp="${MAILGUN_SMTP_HOST}" \
+    --smtp-port="${MAILGUN_SMTP_PORT}" \
+    --smtp-user="${MAILGUN_SMTP_USER}" \
+    --smtp-password="${MAILGUN_SMTP_PASSWORD}" \
+    --email-from="${MAILGUN_EMAIL_FROM}"
