@@ -2,6 +2,10 @@
 
 set -e
 
+# Wait for Railway's private network DNS to resolve
+echo "Waiting for private network DNS..."
+sleep 3
+
 # Railway's internal PostgreSQL hostname
 # If ODOO_DATABASE_HOST is empty, use Railway's internal network
 DB_HOST="${ODOO_DATABASE_HOST:-postgres.railway.internal}"
