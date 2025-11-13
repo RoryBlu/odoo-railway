@@ -1,15 +1,20 @@
 FROM odoo:18.0
 
-# Run as root to fix volume permissions
+ARG LOCALE=en_US.UTF-8
+
+ENV LANGUAGE=${LOCALE}
+ENV LC_ALL=${LOCALE}
+ENV LANG=${LOCALE}
+
 USER 0
 
-# Copy custom entrypoint script
-COPY --chmod=755 entrypoint.sh /app/entrypoint.sh
-
-# Explicitly expose port 8069 for Railway
-EXPOSE 8069
+RUN apt-get -y update && apt-get install -y --no-install-recommends locales netcat-openbsd \
+    && locale-gen ${LOCALE}
 
 WORKDIR /app
 
+COPY --chmod=755 entrypoint.sh ./
+
 ENTRYPOINT ["/bin/sh"]
+
 CMD ["entrypoint.sh"]
