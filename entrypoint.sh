@@ -45,6 +45,9 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO odoo;
 EOF
 echo "Odoo user ready"
 
+# Ensure odoo user owns the data directory
+chown -R odoo:odoo /var/lib/odoo
+
 # Drop privileges to odoo user (UID 101) before running Odoo
 exec gosu odoo odoo \
     --http-interface=0.0.0.0 \
