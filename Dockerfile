@@ -12,10 +12,8 @@ RUN apt-get -y update && apt-get install -y --no-install-recommends locales netc
     && locale-gen ${LOCALE}
 
 WORKDIR /app
+COPY --chmod=755 entrypoint-wrapper.sh ./
 
-COPY --chmod=755 entrypoint.sh ./
-COPY --chmod=644 odoo.conf /etc/odoo/odoo.conf
-
-ENTRYPOINT ["/bin/sh"]
-
-CMD ["entrypoint.sh"]
+# Use wrapper that sets env vars then calls official entrypoint
+ENTRYPOINT ["/app/entrypoint-wrapper.sh"]
+CMD ["odoo"]
