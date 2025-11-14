@@ -14,6 +14,7 @@ RUN apt-get -y update && apt-get install -y --no-install-recommends locales netc
 WORKDIR /app
 
 COPY --chmod=755 entrypoint.sh ./
+COPY --chmod=644 odoo.conf /etc/odoo/odoo.conf
 
 ENTRYPOINT ["/bin/sh"]
 
