@@ -49,12 +49,12 @@ echo "Odoo user ready"
 chown -R odoo:odoo /var/lib/odoo
 
 # Drop privileges to odoo user (UID 101) before running Odoo
+# Run Odoo in database manager mode (no database specified)
+# Users will create databases and enter credentials through the web UI
 exec gosu odoo odoo \
     --http-interface=0.0.0.0 \
     --http-port="${PORT}" \
     --without-demo=all \
     --proxy-mode \
     --db_host="${DB_HOST}" \
-    --db_port="${DB_PORT}" \
-    --db_user="${ODOO_DATABASE_USER}" \
-    --db_password="${ODOO_DATABASE_PASSWORD}"
+    --db_port="${DB_PORT}"
