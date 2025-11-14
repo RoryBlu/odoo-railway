@@ -10,6 +10,7 @@ echo Database is now available
 
 # Run Odoo without specifying a database to show database manager
 exec odoo \
+    --http-interface=0.0.0.0 \
     --http-port="${PORT}" \
     --without-demo=all \
     --db-filter=.* \
