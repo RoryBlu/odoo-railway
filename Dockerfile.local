@@ -13,8 +13,8 @@ COPY addons /mnt/extra-addons
 # Set proper ownership for the odoo user
 RUN chown -R odoo:odoo /mnt/extra-addons
 
-# Switch back to odoo user for security
-USER odoo
+# Note: Running as root to ensure write access to Railway volume mounts
+# Railway containers are isolated, so running as root is acceptable
 
 # The official odoo:18.0 image already provides:
 # - Odoo framework and core
