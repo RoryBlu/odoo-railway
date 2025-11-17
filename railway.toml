@@ -1,4 +1,15 @@
 # railway.toml
+# Railway deployment configuration for Odoo 18 Enterprise
 
 [build]
-builder = "DOCKERFILE"
+image = "roryblu/odoo-sparkjar:18.0"
+
+[deploy]
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3
+
+# CRITICAL: Mount volume for persistent data
+# Without this, all filestore data (attachments, images, etc.) will be lost on restart!
+[[deploy.volumeMounts]]
+mountPath = "/var/lib/odoo"
+name = "odoo_data"

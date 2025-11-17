@@ -1,33 +1,37 @@
 # Dockerfile
-# Odoo 18 Community + Enterprise addons on Railway
+# Odoo 18 Enterprise on Railway using official image + Enterprise addons
+# Following official Odoo Docker deployment pattern
 
 FROM odoo:18.0
 
-# Build steps run as root
 USER root
 
-# Directory for Enterprise addons
-RUN mkdir -p /mnt/enterprise && chown -R odoo:odoo /mnt/enterprise
+# Copy Enterprise + Community addons (1337 modules total)
+# This includes both CE and EE addons from the official Odoo 18 Enterprise package
+COPY addons /mnt/extra-addons
 
-# IMPORTANT:
-# You must place the extracted Odoo 18 Enterprise "enterprise" folder
-# at the root of this repo before building.
-COPY enterprise /mnt/enterprise
+# Set proper ownership for the odoo user
+RUN chown -R odoo:odoo /mnt/extra-addons
 
-# Make sure permissions are correct
-RUN chown -R odoo:odoo /mnt/enterprise
-
-# Switch back to the odoo user for runtime
+# Switch back to odoo user for security
 USER odoo
 
-# Default working directory (also where the Railway volume is mounted)
-WORKDIR /var/lib/odoo
+# The official odoo:18.0 image already provides:
+# - Odoo framework and core
+# - All system dependencies
+# - Proper entrypoint script
+# - Configuration handling via environment variables
+# - Volume support for /var/lib/odoo
 
-# Run Odoo:
-# - keep data_dir at /var/lib/odoo (matches your Railway volume)
-# - add /mnt/enterprise to addons_path
-CMD [
-  "odoo",
-  "--addons-path=/usr/lib/python3/dist-packages/odoo/addons,/mnt/enterprise",
-  "--data-dir=/var/lib/odoo"
-]
+# Environment variables (can be overridden by Railway):
+# - DB configuration: Use Railway's Postgres service variables
+# - PORT: Railway sets this automatically
+# - Data directory: /var/lib/odoo (mount Railway volume here)
+
+# The official entrypoint handles:
+# - Database connection (via env vars: HOST, PORT, USER, PASSWORD, etc.)
+# - Addons path configuration (--addons-path)
+# - Port configuration (defaults to 8069)
+# - All standard Odoo CLI arguments
+
+# No custom entrypoint needed - the official image handles everything!
