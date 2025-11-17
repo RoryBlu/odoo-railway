@@ -2,7 +2,8 @@
 # Railway deployment configuration for Odoo 18 Enterprise
 
 [build]
-image = "roryblu/odoo-sparkjar:18.0.1"
+# Build from Dockerfile instead of pulling pre-built image
+# Railway's image cache is too aggressive
 
 [deploy]
 restartPolicyType = "ON_FAILURE"
