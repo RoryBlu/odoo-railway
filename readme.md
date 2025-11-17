@@ -1,70 +1,39 @@
-# Odoo on Railway
+# Odoo 18 on Railway (Community + Enterprise)
 
-Deploy Odoo 18.0 ERP/CRM on Railway with PostgreSQL backend.
+This repo builds an Odoo 18 image for Railway using the official `odoo:18.0` Docker image
+and layers the Enterprise addons on top.
 
-## Quick Deploy
+It is designed to:
 
-[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/odoo)
+- Use an **existing PostgreSQL database** on Railway.
+- Use an **existing Railway volume** mounted at `/var/lib/odoo`.
+- Run **Odoo 18** with both Community and Enterprise addons.
 
-## Prerequisites
+## 1. Prerequisites
 
-1. **PostgreSQL Database**: Deploy a PostgreSQL service on Railway first
-2. **Database User**: Create a dedicated user (NOT 'postgres'):
-   ```sql
-   CREATE USER odoo WITH CREATEDB PASSWORD 'your-secure-password';
-   ```
+- A running **Postgres** service on Railway (you already have this).
+- An existing Odoo database in that Postgres instance (your current CE DB).
+- A Railway volume attached to the Odoo service at `/var/lib/odoo`.
+- An Odoo Enterprise subscription and the **Odoo 18 Enterprise source** download. 
 
-## Environment Variables
+## 2. Prepare the Enterprise addons
 
-Configure these in Railway's environment variables:
+1. Download the Odoo 18 **Enterprise** tarball from your Odoo account. 
+2. Extract it locally.
+3. From the extracted content, create a folder named `enterprise/` that contains the
+   Enterprise addons (standard pattern is CE + separate `enterprise` folder). 
+4. Place that `enterprise/` folder in the root of this repo (next to the Dockerfile).
 
-### Required Database Variables
-- `HOST` - PostgreSQL host (use `${{Postgres.PGHOST}}`)
-- `PORT` - PostgreSQL port (use `${{Postgres.PGPORT}}`)
-- `USER` - Database user (e.g., 'odoo')
-- `PASSWORD` - Database password
+Your tree should look like:
 
-### Optional Variables
-- `POSTGRES_DB` - Database name (defaults to 'postgres')
-- `ADMIN_PASSWORD` - Odoo admin password (set on first login if not provided)
-
-## Features
-
-- **Odoo 18.0**: Latest stable version with all core modules
-- **PostgreSQL Backend**: Reliable database with private networking
-- **Persistent Storage**: Volume mount at `/var/lib/odoo` for data persistence
-- **Security**: Runs as non-root 'odoo' user (UID 101)
-- **Health Checks**: Automatic monitoring and restart on failure
-
-## Post-Deployment
-
-1. Access Odoo at your Railway-provided URL
-2. Set admin password on first login
-3. Install desired business modules through the Apps interface
-4. Configure SMTP settings for email functionality (optional)
-
-## Architecture
-
-This deployment uses the official Odoo Docker image with minimal customization:
-- Base image: `odoo:18.0`
-- Data persistence: Railway volume at `/var/lib/odoo`
-- Networking: Private PostgreSQL connection
-- Security: Non-root execution
-
-## Important Notes
-
-- **Never use 'postgres' as database user** - Odoo blocks this for security
-- **Save admin credentials** - Set strong password on first login
-- **Regular backups recommended** - Use Railway's backup features
-- **Module installation** - Some modules may require additional configuration
-
-## Resources
-
-- [Odoo Documentation](https://www.odoo.com/documentation/18.0/)
-- [Railway Documentation](https://docs.railway.app/)
-- [Odoo GitHub](https://github.com/odoo/odoo)
-
-## Support
-
-For issues specific to this Railway template, please open an issue in this repository.
-For Odoo-specific questions, visit the [Odoo Community Forum](https://www.odoo.com/forum/help-1).
+```text
+odoo-railway/
+  Dockerfile
+  railway.toml
+  .env.railway
+  agents.md
+  README.md
+  enterprise/
+    account_enterprise/
+    web_enterprise/
+    ...

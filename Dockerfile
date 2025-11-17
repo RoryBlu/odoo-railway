@@ -1,21 +1,33 @@
+# Dockerfile
+# Odoo 18 Community + Enterprise addons on Railway
+
 FROM odoo:18.0
 
-# The official Odoo image already includes:
-# - Proper entrypoint script that handles database connections
-# - gosu for privilege dropping
-# - All necessary dependencies
-# - Correct file permissions
-
-# We only need to ensure Railway can write to the data directory
+# Build steps run as root
 USER root
-RUN mkdir -p /var/lib/odoo && \
-    chown -R odoo:odoo /var/lib/odoo && \
-    chmod 755 /var/lib/odoo
 
-# Switch back to odoo user
+# Directory for Enterprise addons
+RUN mkdir -p /mnt/enterprise && chown -R odoo:odoo /mnt/enterprise
+
+# IMPORTANT:
+# You must place the extracted Odoo 18 Enterprise "enterprise" folder
+# at the root of this repo before building.
+COPY enterprise /mnt/enterprise
+
+# Make sure permissions are correct
+RUN chown -R odoo:odoo /mnt/enterprise
+
+# Switch back to the odoo user for runtime
 USER odoo
 
-# Explicitly expose port 8069 for Railway
-EXPOSE 8069
+# Default working directory (also where the Railway volume is mounted)
+WORKDIR /var/lib/odoo
 
-# The official image's entrypoint handles everything
+# Run Odoo:
+# - keep data_dir at /var/lib/odoo (matches your Railway volume)
+# - add /mnt/enterprise to addons_path
+CMD [
+  "odoo",
+  "--addons-path=/usr/lib/python3/dist-packages/odoo/addons,/mnt/enterprise",
+  "--data-dir=/var/lib/odoo"
+]
