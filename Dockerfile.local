@@ -13,9 +13,17 @@ COPY addons /mnt/extra-addons
 # Copy custom odoo.conf with hardcoded db_port to bypass Railway PORT conflict
 COPY odoo.conf /etc/odoo/odoo.conf
 
+# Copy custom entrypoint that sets PORT=5432 if empty (fixes Railway PORT clearing)
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+
 # Set proper ownership
 RUN chown -R odoo:odoo /mnt/extra-addons && \
     chown odoo:odoo /etc/odoo/odoo.conf
+
+# Use custom entrypoint that fixes empty PORT before calling original
+ENTRYPOINT ["/docker-entrypoint.sh"]
+CMD ["odoo"]
 
 # Switch back to odoo user (Railway will handle UID via RAILWAY_RUN_UID=0)
 USER odoo
