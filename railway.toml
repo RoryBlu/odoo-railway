@@ -2,7 +2,7 @@
 # Railway deployment configuration for Odoo 18 Enterprise
 
 [build]
-image = "roryblu/odoo-sparkjar:18.0"
+image = "roryblu/odoo-sparkjar:18.0.1"
 
 [deploy]
 restartPolicyType = "ON_FAILURE"
