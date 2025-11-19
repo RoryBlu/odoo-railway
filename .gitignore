@@ -15,10 +15,20 @@ __pycache__/
 *.log
 /var/lib/odoo/
 
-# CRITICAL: Odoo addons folder (1.7GB - too large for git)
-# Build Docker image locally with addons, then push image to registry
+# CRITICAL: Odoo Enterprise source (too large for git)
+# Build Docker image locally with complete source, then push to registry
 # See readme.md for deployment instructions
 /addons/
+/odoo/
+odoo.egg-info/
+setup/
+PKG-INFO
+MANIFEST.in
+setup.py
+setup.cfg
+requirements.txt
+LICENSE
+build.log
 
 # OS
 .DS_Store
